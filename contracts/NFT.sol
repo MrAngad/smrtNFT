@@ -1802,22 +1802,11 @@ contract SmartNodeNFT is ERC1155, Ownable, ReentrancyGuard, Pausable, ERC1155Sup
     uint256 public mintPrice;
     uint256 private count = 0;
 
-    address TREASURY = 0x23E7E35a3A13886d242Dd457A5a76CaB7AEb9584;
-
     constructor() ERC1155(baseURI) ReentrancyGuard(){
         pause();
     }
 
-    function updateToken(IERC20 _token)public onlyOwner{
-        token = IERC20(_token);
-    }
-
-    function updateTreasury(address _treasury)public onlyOwner{
-        TREASURY = _treasury;
-    }
-
-    function mint(uint256 _amount) external {
-        token.safeTransferFrom(msg.sender, TREASURY, mintPrice.mul(_amount));
+    function mint(uint256 _amount) external payable {
         for(uint256 i = 0; i < _amount; i++) {
             _mint(address(msg.sender), (count%7), 1, "0x0");
             count += 1;
@@ -1852,4 +1841,10 @@ contract SmartNodeNFT is ERC1155, Ownable, ReentrancyGuard, Pausable, ERC1155Sup
     {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
+
+    function withdrawTotal() external onlyOwner {
+        uint balance = address(this).balance;
+        payable(msg.sender).transfer(balance);
+    }
+
 }
